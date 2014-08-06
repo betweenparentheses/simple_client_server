@@ -9,6 +9,32 @@ class Server
     @server = TCPServer.open(2000) #open method is the exact same as File.open. inherits from IO
   end
 
+  def status_line(code)
+    version = "HTTP/1.0"
+    case code
+    when 200 then message = "OK"
+    when 404 then message = "Not Found"
+    else return nil 
+    end
+    "#{version} #{code} #{message}"
+  end
+    
+  def length_header(body)
+    "Content-Length: #{body.length}"
+  end
+  
+  #given a status code and an optional message body, returns the HTTP response headers
+  def headers(code, body = nil)
+    head = status_line(code)
+    head = "#{head}\n#{length_header(body)}" if body
+    head
+  end
+  
+  def sign_off(client)
+    client.puts(Time.now.ctime) #now when puts to that socket, client picks up on other side.
+    client.puts "Closing the connection. Bye!"
+  end
+
   def run
     loop do
       client = @server.accept #instance method of TCPServer. waits for connection, returns TCPSocket representing that connection
@@ -18,29 +44,18 @@ class Server
         puts line.chomp
         break if line =~ /^\s*$/
         request = Request.new(line) # parses the line into a Request
-        if request.get? && request.path ~= /index\.html$/ 
-          #TODO refactor a bunch of these into methods
-          #opens index.html
-          index = File.open(index.html, 'r')
-          html = index.read
+        if request.get? && request.path ~= /index\.html$/
+          body = (File.open(index.html, 'r')).read
+          head = headers(200, body)
           
-          #creates an OK status line
-          version = "HTTP/1.0"
-          code = "200"
-          message = "OK"
-          status = "#{version} #{code} #{message}"
-          
-          client.print(status)
-          client.print(html)
-          
-          #TODO: add an ELSIF for a file not found with code 404 and message not found
-        end
+          client.puts(headers)
+          client.puts(body)
+        elsif request.get? #we only have one html file, index.html, so it's requesting something else that doesn't exist
+          client.print(headers(404))
+         end
       end
       
-      
-
-      client.puts(Time.now.ctime) #now when puts to that socket, client picks up on other side.
-      client.puts "Closing the connection. Bye!"
+      sign_off(client)
       client.close
     end
   end
