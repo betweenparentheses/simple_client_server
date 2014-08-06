@@ -18,6 +18,9 @@ class Server
         puts line.chomp
         break if line =~ /^\s*$/
         request = Request.new(line) # parses the line into a Request
+        if request.get? && request.path ~= /index\.html$/ #if this is a get request and it wants index.html
+          client.puts(File.open(index.html, 'r'))
+        end
       end
 
       client.puts(Time.now.ctime) #now when puts to that socket, client picks up on other side.
@@ -31,12 +34,12 @@ end
 #parses a string into the three parts of an HTML request
 #TODO: make this work with a POST
 class Request
-  attr_reader :method, :address, :version
+  attr_reader :method, :path, :version
   def initialize(string)
     if string ~= /^GET/
       parts = string.split(" ") #an HTML GET is split by spaces
       @method = parts[0] #first part is GET
-      @address = parts[1] #second part is the address
+      @path = parts[1] #second part is the address
       @version = parts[2] #third part is the HTML version
     elsif string ~= /^POST/
       @method = "POST"
