@@ -32,6 +32,8 @@ class Server
           
           client.print(status)
           client.print(html)
+          
+          #TODO: add an ELSIF for a file not found with code 404 and message not found
         end
       end
       
