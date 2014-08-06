@@ -29,6 +29,7 @@ class Server
 end
 
 #parses a string into the three parts of an HTML request
+#TODO: make this work with a POST
 class Request
   attr_reader :method, :address, :version
   def initialize(string)
