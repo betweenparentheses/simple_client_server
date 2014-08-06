@@ -14,14 +14,28 @@ class Server
       client = @server.accept #instance method of TCPServer. waits for connection, returns TCPSocket representing that connection
       
       
-      while line = client.gets #gets requests from client
+      while line = client.gets
         puts line.chomp
         break if line =~ /^\s*$/
         request = Request.new(line) # parses the line into a Request
-        if request.get? && request.path ~= /index\.html$/ #if this is a get request and it wants index.html
-          client.puts(File.open(index.html, 'r'))
+        if request.get? && request.path ~= /index\.html$/ 
+          #TODO refactor a bunch of these into methods
+          #opens index.html
+          index = File.open(index.html, 'r')
+          html = index.read
+          
+          #creates an OK status line
+          version = "HTTP/1.0"
+          code = "200"
+          message = "OK"
+          status = "#{version} #{code} #{message}"
+          
+          client.print(status)
+          client.print(html)
         end
       end
+      
+      
 
       client.puts(Time.now.ctime) #now when puts to that socket, client picks up on other side.
       client.puts "Closing the connection. Bye!"
