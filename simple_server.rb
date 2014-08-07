@@ -52,7 +52,7 @@ class Server
           client.puts(head)
           client.puts(body)
         elsif request.get? #we only have one html file, index.html, so it's requesting something else that doesn't exist
-          client.print(headers(404))
+          client.puts(headers(404))
          end
       end
 
