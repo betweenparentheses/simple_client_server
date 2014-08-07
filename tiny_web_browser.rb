@@ -48,7 +48,7 @@ end
 #connects, requests and gets the whole response
 p request
 socket = TCPSocket.open(host, port)
-socket.print(request)
+socket.send(request, 0)
 response = socket.read
 
 #split response at first blank line into headers and body
