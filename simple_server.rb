@@ -61,7 +61,7 @@ end
 class Request
   attr_reader :method, :path, :version, :body
   def initialize(string)
-    header, @body = string.split("/r/r/n/n", 2)
+    header, @body = string.split("\r\n\r\n", 2)
     @method = header.split[0]
     @path = header.split[1]
     @version = header.split[2]
