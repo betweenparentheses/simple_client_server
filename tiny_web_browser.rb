@@ -2,7 +2,7 @@ require 'socket'
 require 'json'
 
 host = 'localhost' #the web server
-port = 2001
+port = 2000
 path = "/index.html" #the file we want
 
 
@@ -28,24 +28,26 @@ when "POST"
   name = gets.chomp
   print "Please enter your Viking's e-mail address: "
   address = gets.chomp
-end
 
-#packs up data into a JSON for the request
-viking_hash = {viking: {name: name, address: address}}
-viking_json = viking_hash.to_json
-
-#set up post request
+  #packs up data into a JSON for the request
+  viking_hash = {viking: {name: name, address: address}}
+  viking_json = viking_hash.to_json
+  #set up post request
 request = <<POST_REQUEST
 POST #{path} HTTP/1.0
 From: #{address}
 Content-Type: application/json
 Content-Length: #{viking_json.length}
 
-#{viking_json}
+\r\n\r\n#{viking_json}
 POST_REQUEST
+end
+
+
 
 
 #connects, requests and gets the whole response
+p request
 socket = TCPSocket.open(host, port)
 socket.print(request)
 response = socket.read
@@ -55,3 +57,4 @@ headers, body = response.split("\r\n\r\n", 2)
 
 #if response works, prints body, otherwise shows the errors
 puts headers =~ (/200 OK/) ? body : headers
+socket.close

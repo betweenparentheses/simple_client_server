@@ -31,52 +31,41 @@ class Server
     head
   end
 
-  def sign_off(client)
-    client.puts(Time.now.ctime) #now when puts to that socket, client picks up on other side.
-    client.puts "Closing the connection. Bye!"
-  end
-
   def run
+
+    server = TCPServer.open(2000)
     loop do
-      client = @server.accept #instance method of TCPServer. waits for connection, returns TCPSocket representing that connection
-
-
-      while line = client.gets
-        puts line.chomp
-        break if line =~ /^\s*$/
-        request = Request.new(line) # parses the line into a Request
-        if request.get? && request.path =~ /index\.html$/
-          body = (File.open('index.html', 'r')).read
-          head = headers(200, body)
+      Thread.start(server.accept) do |client|
+        p client
+        request_raw = client.read_nonblock(256)
+        p request_raw
+        request = Request.new(request_raw) # parses the line into a Request
+        p request
+        if File.exist?(request.path)
+          response_head = headers(200, body)
+          response_body = (File.open(request.path, 'r')).read
 
           client.puts(head)
           client.puts(body)
-        elsif request.get? #we only have one html file, index.html, so it's requesting something else that doesn't exist
+        else
           client.puts(headers(404))
-         end
+        end
+        client.close
       end
-
-      sign_off(client)
-      client.close
     end
   end
-
 end
 
 #parses a string into the three parts of an HTML request
 #TODO: make this work with a POST
 class Request
-  attr_reader :method, :path, :version
+  attr_reader :method, :path, :version, :body
   def initialize(string)
-    if string =~ /^GET/
-      parts = string.split(" ") #an HTML GET is split by spaces
-      @method = parts[0] #first part is GET
-      @path = parts[1] #second part is the address
-      @version = parts[2] #third part is the HTML version
-    elsif string =~ /^POST/
-      @method = "POST"
-      #deal with rest of lines
-    end
+    header, @body = string.split("/r/r/n/n", 2)
+    @method = header.split[0]
+    @path = header.split[1]
+    @version = header.split[2]
+    puts @method, @path, @version, @body
   end
 
   def post?
