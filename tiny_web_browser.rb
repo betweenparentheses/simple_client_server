@@ -3,7 +3,6 @@ require 'json'
 
 host = 'localhost' #the web server
 port = 2000
-path = "/index.html" #the file we want
 
 
 puts "Welcome to your tiny web browser!"
