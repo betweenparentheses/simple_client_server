@@ -6,7 +6,7 @@ module SimpleServer
 class Server
 
   def initialize
-    @server = TCPServer.open(2001) #open method is the exact same as File.open. inherits from IO
+    @server = TCPServer.open(2000) #open method is the exact same as File.open. inherits from IO
   end
 
   def status_line(code)
@@ -58,6 +58,8 @@ end
 
 #parses a string into the three parts of an HTML request
 #TODO: make this work with a POST
+#sample POST request: "POST /thanks.html HTTP/1.0\nFrom: blep@blap.bl\nContent-Type: application/json\n
+#Content-Length: 50\n\r\n\r\n{\"viking\":{\"name\":\"Bob\",\"address\":\"blep@blap.bl\"}}\n"
 class Request
   attr_reader :method, :path, :version, :body
   def initialize(string)
@@ -65,6 +67,7 @@ class Request
     @method = header.split[0]
     @path = header.split[1]
     @version = header.split[2]
+    @other_headers = header.split[3..-1] #just for now to test some things
     puts @method, @path, @version, @body
   end
 
