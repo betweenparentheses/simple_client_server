@@ -6,7 +6,7 @@ module SimpleServer
 class Server
 
   def initialize
-    @server = TCPServer.open(2000) #open method is the exact same as File.open. inherits from IO
+    @server = TCPServer.open(2001) #open method is the exact same as File.open. inherits from IO
   end
 
   def status_line(code)
@@ -27,6 +27,7 @@ class Server
   def headers(code, body = nil)
     head = status_line(code)
     head = "#{head}\n#{length_header(body)}" if body
+    head += "\r\n\r\n"
     head
   end
 
