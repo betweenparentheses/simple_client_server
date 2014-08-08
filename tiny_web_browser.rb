@@ -2,7 +2,7 @@ require 'socket'
 require 'json'
 
 host = 'localhost' #the web server
-port = 2000
+port = 2009
 
 
 puts "Welcome to your tiny web browser!"
@@ -48,7 +48,8 @@ end
 #connects, requests and gets the whole response
 p request
 socket = TCPSocket.open(host, port)
-socket.send(request, 0)
+socket.print(request)
+
 response = socket.read
 
 #split response at first blank line into headers and body
